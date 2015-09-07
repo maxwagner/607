@@ -39,6 +39,7 @@ LEFT OUTER JOIN planes p ON p.tailnum = f.tailnum
 WHERE f.month = 7 AND f.year = 2013 AND f.day = 5
 GROUP BY p.manufacturer;
 
+-- 4
 -- select all flights where the engine is a "Turbo-fan", the airline is Delta Airlines Inc, with carrier name listed, not abbreviation
 SELECT
 CONCAT(f.Month,'/',f.Day,'/',f.Year, ' @ ', f.dep_time) AS Date, al.name AS Carrier
