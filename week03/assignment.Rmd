@@ -5,31 +5,34 @@ date: "September 12, 2015"
 output: html_document
 ---
 
-
-
-Loading the data in from the csv file.
+Loading the libraries needed and the data from the csv file.
 ```{r}
 library(RCurl)
 library(plyr)
-dat <- data.frame(read.csv("agaricus-lepiota.data.csv", header = FALSE))
+dat <- data.frame(read.csv(text = getURL("https://raw.githubusercontent.com/maxwagner/607/master/week03/bridges.csv"), header = FALSE))
 ```
 
-Picking columns to show and renaming the columns.
+***
+Pick some columns to look at, and give them names.
 ```{r}
-mushrooms <- subset(dat, select = c(1, 2, 5, 9))
-colnames(mushrooms) <- c("Poisonous", "Cap_Shape", "Bruises", "Gill_Size")
+colnames(dat) <- c("id", "river", "location", "erected", "purpose", "length", "lanes", "clear_g", "t_or_d", "material", "span", "rel_l", "type")
+bridges <- subset(dat, select = c(1, 5, 9, 10))
+head(bridges)
 ```
 
-Renaming the abbreviations to something a little better with "plyr"
+***
+Rename and alter some values in the columns with plyr.
 ```{r}
-mushrooms$Poisonous <- revalue(mushrooms$Poisonous, c("p" = "poisonous", "e" = "edible"))
-mushrooms$Cap_Shape <- revalue(mushrooms$Cap_Shape, c("b" = "bell", "c" = "conical", "x" = "convex", 
-                                                      "f" = "flat", "k" = "knobbed", "s" = "sunken"))
-mushrooms$Bruises <- revalue(mushrooms$Bruises, c("t" = "yes", "f" = "no"))
-mushrooms$Gill_Size <- revalue(mushrooms$Gill_Size, c("b" = "broad", "n" = "narrow"))
+bridges$id <- tolower(bridges$id)
+bridges$t_or_d <- revalue(bridges$t_or_d, c("THROUGH" = "through", "DECK" = "deck"))
+bridges$purpose <- revalue(bridges$purpose, c("WALK" = "walk", "AQUEDUCT" = "aqdt", "RR" = "rr", "HIGHWAY" = "hwy"))
+bridges$material <- revalue(bridges$material, c("WOOD" = "wood", "IRON" = "iron", "STEEL" = "steel"))
+head(bridges)
 ```
 
-Testing to see if the data frame looks the way I want it to.
+***
+Subset some rows...
 ```{r}
-mushrooms[1:10,1:4]
+bridges <- subset(bridges, material == "iron" | purpose == "aqdt")
+head(bridges)
 ```
