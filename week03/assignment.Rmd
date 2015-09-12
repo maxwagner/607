@@ -1,0 +1,35 @@
+---
+title: "Week 03 Assignment"
+author: "Max Wagner"
+date: "September 12, 2015"
+output: html_document
+---
+
+
+
+Loading the data in from the csv file.
+```{r}
+library(RCurl)
+library(plyr)
+dat <- data.frame(read.csv("agaricus-lepiota.data.csv", header = FALSE))
+```
+
+Picking columns to show and renaming the columns.
+```{r}
+mushrooms <- subset(dat, select = c(1, 2, 5, 9))
+colnames(mushrooms) <- c("Poisonous", "Cap_Shape", "Bruises", "Gill_Size")
+```
+
+Renaming the abbreviations to something a little better with "plyr"
+```{r}
+mushrooms$Poisonous <- revalue(mushrooms$Poisonous, c("p" = "poisonous", "e" = "edible"))
+mushrooms$Cap_Shape <- revalue(mushrooms$Cap_Shape, c("b" = "bell", "c" = "conical", "x" = "convex", 
+                                                      "f" = "flat", "k" = "knobbed", "s" = "sunken"))
+mushrooms$Bruises <- revalue(mushrooms$Bruises, c("t" = "yes", "f" = "no"))
+mushrooms$Gill_Size <- revalue(mushrooms$Gill_Size, c("b" = "broad", "n" = "narrow"))
+```
+
+Testing to see if the data frame looks the way I want it to.
+```{r}
+mushrooms[1:10,1:4]
+```
