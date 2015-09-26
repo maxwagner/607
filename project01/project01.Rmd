@@ -1,0 +1,63 @@
+---
+title: "Week 04 Assignment"
+author: "Max Wagner"
+date: "September 18, 2015"
+output: html_document
+---
+***
+
+4a. [0-9]+\\$ is looking for any number 0-9, followed by a $. The "\\" negates the metacharacter meaning of the $. The "+" means the numeric can be returned one or more times.
+```{r}
+library(stringr)
+example <- c("44", "$3", "5$", "asdasdsad11$", "5$ s")
+unlist(str_extract_all(example, "[0-9]+\\$"))
+```
+
+4b. \\b[a-z]{1,4}\\b is looking for a-z, 1 to 4 times, with a word edge on either side.
+```{r}
+example <- c("qab", "baab", "baaab", "b1b")
+typeof(example)
+unlist(str_extract_all(example, "\\b[a-z]{1,4}\\b"))
+```
+
+4c. .*?\\.txt$ means that we are looking for a string where ".txt" is on the end. The other part means any char, any number of time, but limits it to the shortest possible sequence.
+```{r}
+example <- c("qq.txt", "qq.tyt", "n13u19237hun3uynjasnd-/*//*/-.txt", ".txt")
+unlist(str_extract_all(example, ".*?\\.txt$"))
+```
+
+4d. \\d{2}/\\d{2}/\\d{4} is looking for a date format, 2 digits, /, 2 digits, /, 4 digits
+```{r}
+example <- c("00/00/0000", "00.00.0000", "aa/aa/aaaa", "12/34/5678")
+unlist(str_extract_all(example, "\\d{2}/\\d{2}/\\d{4}"))
+```
+
+4e. <(.+?)>.+?</\\1> is checking for bbcode. Where the format looks like "<b>anything</b>" and the opener and closer have to be the same.
+```{r}
+example <- c("<b>words</b>", "<b>words</i>", "/b/words</b>")
+unlist(str_extract_all(example, "<(.+?)>.+?</\\1>"))
+```
+
+5. [0-9]+\\$ can be rewritten as \\d{1,}[$] which combines the digit shortcut, and a wrapper for the $ metacharacter.
+```{r}
+example <- c("44", "$3", "5$", "asdasdsad11$")
+unlist(str_extract_all(example, "\\d{1,}[$]"))
+```
+
+6a. chunkylover53[at]aol[dot]com can be transformed with the following:
+```{r}
+example <- "chunkylover53[at]aol[dot]com"
+example <- str_replace(example, fixed("[at]"), "@")
+example <- str_replace(example, fixed("[dot]"), ".")
+example
+```
+
+6b. [:digit:] does seem to work if you want to extract digit seperately. To keep numbers together that were together in the string, use a "+":
+```{r}
+unlist(str_extract_all(example, "[:digit:]+"))
+```
+
+6c. //D fails because it is looking for no digits, instead of digits, use the following instead:
+```{r}
+unlist(str_extract_all(example, "\\d+"))
+```
