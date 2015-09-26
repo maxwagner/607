@@ -27,3 +27,9 @@ opponents <- data.frame(matrix(as.numeric(opponents), nrow = 64, byrow = T))
 opponents <- round(apply(opponents, 1, mean, na.rm = T), 2)
 chess_final <- cbind(name, state, points, starting_score, opponents);chess_final
 write.csv(chess_final, file = "chess_output.csv")
+
+calc_new <- function(old, opp, score, k) {
+  ea <- (1 / (1 + 10 ^ ((opp - old) / 400)))
+  rounded <- round((old + (k * (1 - ea))), digits = 0)
+  return(rounded)
+}

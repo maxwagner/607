@@ -51,6 +51,18 @@ chess_final <- cbind(name, state, points, starting_score, opponents)
 write.csv(chess_final, file = "chess_output.csv")
 ```
 
+***
 A small sample from the top of the output file:
 ```{r}
+head(read.csv("https://raw.githubusercontent.com/maxwagner/607/master/project01/chess_output.csv"))
+```
+
+***
+I was looking into the ELO scoring part of it a little, and wrote something that would get the estimated outcome, as well as the new scores, when given the player's old score, opponent's score, the outcome of the game, and a k value. Not really useful without pulling a bit more data from the text file.
+```{r}
+calc_new <- function(old, opp, score, k) {
+  ea <- (1 / (1 + 10 ^ ((opp - old) / 400)))
+  rounded <- round((old + (k * (1 - ea))), digits = 0)
+  return(rounded)
+}
 ```
