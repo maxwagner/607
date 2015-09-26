@@ -1,63 +1,56 @@
 ---
-title: "Week 04 Assignment"
+title: "Project 01 - Chess"
 author: "Max Wagner"
-date: "September 18, 2015"
+date: "September 26, 2015"
 output: html_document
 ---
 ***
 
-4a. [0-9]+\\$ is looking for any number 0-9, followed by a $. The "\\" negates the metacharacter meaning of the $. The "+" means the numeric can be returned one or more times.
+The first few steps include scanning in the text file, and then concatenating it with a " " as a seperator. It might be excessive, but I then extracted each person as a seperate line instead of the 3 they take up in the original file. This makes pulling data simpler later on.
 ```{r}
 library(stringr)
-example <- c("44", "$3", "5$", "asdasdsad11$", "5$ s")
-unlist(str_extract_all(example, "[0-9]+\\$"))
+chess <- scan(file = "https://raw.githubusercontent.com/maxwagner/607/master/project01/tournamentinfo.txt", what = "character", skip = "3")
+chess <- str_c(chess, collapse = " ")
+chess_sep <- unlist(str_extract_all(chess, "\\d+\\s[|]\\s(\\w+[ -]+)+[|]\\d[.]\\d\\s+[|](\\w\\s+\\d*[|]){7}\\s\\w+\\s[|]\\s\\d+\\s[/]\\sR:\\s[:alnum:]+\\s*->\\s*[:alnum:]+\\s[|].+?[|](\\w*\\s[|]){7}"))
 ```
 
-4b. \\b[a-z]{1,4}\\b is looking for a-z, 1 to 4 times, with a word edge on either side.
+The next section is pulling each piece that I will eventually neeed. The opponents section can surely be done in a cleaner way, but this gets the job done. The last line is to turn empties into NA's.
 ```{r}
-example <- c("qab", "baab", "baaab", "b1b")
-typeof(example)
-unlist(str_extract_all(example, "\\b[a-z]{1,4}\\b"))
+name <- str_trim(unlist(str_extract(chess_sep, "\\s(\\w+[ -]+)+")))
+state <- unlist(str_extract(chess_sep, "[|]\\s\\w{2}\\s[|]"))
+state <- str_trim(str_sub(state, 2, -2));
+points <- unlist(str_extract(chess_sep, "\\d[.]\\d"))
+starting_score <- unlist(str_extract(chess_sep, "R:\\s\\d+"))
+starting_score <- substring(starting_score, 4);
+opponents <- unlist(str_extract(chess_sep, "[|](\\w\\s+\\d*[|]){7}"))
+opponents <- unlist(str_replace_all(opponents, "[:alpha:]+", ""))
+opponents <- unlist(str_replace_all(opponents, "[:space:]+", ""))
+opponents <- str_sub(opponents, 2, -2)
+opponents <- unlist(str_split(opponents, "[|]"))
+opponents <- unlist(str_extract(opponents, "\\d+"))
 ```
 
-4c. .*?\\.txt$ means that we are looking for a string where ".txt" is on the end. The other part means any char, any number of time, but limits it to the shortest possible sequence.
+The following loops through the opponents id's and grabs the score from the points vector.
 ```{r}
-example <- c("qq.txt", "qq.tyt", "n13u19237hun3uynjasnd-/*//*/-.txt", ".txt")
-unlist(str_extract_all(example, ".*?\\.txt$"))
+for (i in 1:length(opponents)) {
+  if (!is.na(opponents[i])) {
+    opponents[i] <- starting_score[as.numeric(opponents[i])]
+  }
+}
 ```
 
-4d. \\d{2}/\\d{2}/\\d{4} is looking for a date format, 2 digits, /, 2 digits, /, 4 digits
+The next step is to convert the scores into a 64 x 7 shape, and then take the mean of each row.
 ```{r}
-example <- c("00/00/0000", "00.00.0000", "aa/aa/aaaa", "12/34/5678")
-unlist(str_extract_all(example, "\\d{2}/\\d{2}/\\d{4}"))
+opponents <- data.frame(matrix(as.numeric(opponents), nrow = 64, byrow = T))
+opponents <- round(apply(opponents, 1, mean, na.rm = T), 2)
 ```
 
-4e. <(.+?)>.+?</\\1> is checking for bbcode. Where the format looks like "<b>anything</b>" and the opener and closer have to be the same.
+Lastly, I combine all the need variables into one frame, and write it to a csv file.
 ```{r}
-example <- c("<b>words</b>", "<b>words</i>", "/b/words</b>")
-unlist(str_extract_all(example, "<(.+?)>.+?</\\1>"))
+chess_final <- cbind(name, state, points, starting_score, opponents)
+write.csv(chess_final, file = "chess_output.csv")
 ```
 
-5. [0-9]+\\$ can be rewritten as \\d{1,}[$] which combines the digit shortcut, and a wrapper for the $ metacharacter.
+A small sample from the top of the output file:
 ```{r}
-example <- c("44", "$3", "5$", "asdasdsad11$")
-unlist(str_extract_all(example, "\\d{1,}[$]"))
-```
-
-6a. chunkylover53[at]aol[dot]com can be transformed with the following:
-```{r}
-example <- "chunkylover53[at]aol[dot]com"
-example <- str_replace(example, fixed("[at]"), "@")
-example <- str_replace(example, fixed("[dot]"), ".")
-example
-```
-
-6b. [:digit:] does seem to work if you want to extract digit seperately. To keep numbers together that were together in the string, use a "+":
-```{r}
-unlist(str_extract_all(example, "[:digit:]+"))
-```
-
-6c. //D fails because it is looking for no digits, instead of digits, use the following instead:
-```{r}
-unlist(str_extract_all(example, "\\d+"))
 ```
