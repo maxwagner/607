@@ -1,0 +1,90 @@
+---
+title: "Project 02"
+author: "Max Wagner"
+date: "october 8th, 2015"
+output: html_document
+---
+***
+
+## Motocross des Nations
+
+The first set of the 3 I am going to look at is some web scraped data from the wikipedia page on Motocross des Nations. The link to the original page can be found [here](https://en.wikipedia.org/wiki/Motocross_des_Nations). It doesn't use much/any tidyr/dplyr, but it does use webscraping with rvest, piping, and quite a bit of data tranformation via other methods. Most of the tidying is taken care of by rvest, and the way the table information is read in.
+
+The first piece is loading in the libraries I need, and a function that does some string replacing in numbers.
+```{r message=FALSE}
+library(rvest)
+library(stringr)
+library(dplyr)
+
+stripSuffix <- function(string) {
+  string <- str_replace(string, "st", "")
+  string <- str_replace(string, "nd", "")
+  string <- str_replace(string, "rd", "")
+  string <- str_replace(string, "th", "")
+  return(string)
+}
+```
+
+The next section scrapes the table of des Nations' stats from a wikipedia page using a xpath.
+```{r}
+url <- "https://en.wikipedia.org/wiki/Motocross_des_Nations"
+xpath <- '//*[@id="mw-content-text"]/table[3]'
+mdn <- url %>%
+  read_html() %>%
+  html_nodes(xpath = xpath) %>%
+  html_table(header = TRUE)
+mdn <- mdn[[1]]
+```
+
+I then remove the last column, as it is useless, then pull out the names of the countries into a separate vector. I then remove the last row from both of them.
+```{r}
+mdn$Years <- NULL
+country <- mdn[1:54,1]
+mdn <- mdn[1:54,2:17]
+```
+
+I then strip the suffixes from the numbers frame with the function I loaded in earlier.
+```{r}
+for (i in 1:16) {
+  mdn[,i] <- stripSuffix(mdn[,i])
+}
+```
+
+Add a column the tracks how many years teams participated in.
+```{r}
+for (i in 1:54) {
+  if (i == 1) {
+    mdn$participated[i] <- sum(mdn[i,] != "")
+  } else {
+    mdn$participated[i] <- sum(mdn[i,] != "") - 1
+  }
+}
+```
+
+Add 0's to blank spots, then convert the table to numerics.
+```{r}
+mdn[mdn == ""] <- 0
+for (i in 1:16) {
+  mdn[,i] <- as.numeric(mdn[,i])
+}
+```
+
+Add columns for sum of postions during the years, and the team's average finishing position. Then, remove the sum column.
+```{r}
+for (i in 1:54) {
+  mdn$sum[i] <- rowSums(mdn[i,1:16])
+}
+mdn <- mutate(mdn, avg = sum / participated)
+mdn$sum <- NULL
+```
+
+Bind the country vector and finishing data back together. The finished product is a table where each row represents; a country, their finishing position from the year 2000-2015, how many years they participated in, and their average finishing position. The added 0's represent years the team did not participate, as this method is typically used in motocross.
+```{r}
+mdn <- cbind(country, mdn)
+```
+
+I can then manipulate the whole table with dplyr. Then, view the head of the new table.
+```{r}
+mdn <- arrange(mdn, avg)
+head(mdn)
+```

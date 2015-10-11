@@ -68,6 +68,8 @@ img {
 
 
 <hr />
+<div id="motocross-des-nations" class="section level2">
+<h2>Motocross des Nations</h2>
 <p>The first set of the 3 I am going to look at is some web scraped data from the wikipedia page on Motocross des Nations. The link to the original page can be found <a href="https://en.wikipedia.org/wiki/Motocross_des_Nations">here</a>. It doesn’t use much/any tidyr/dplyr, but it does use webscraping with rvest, piping, and quite a bit of data tranformation via other methods. Most of the tidying is taken care of by rvest, and the way the table information is read in.</p>
 <p>The first piece is loading in the libraries I need, and a function that does some string replacing in numbers.</p>
 <pre class="r"><code>library(rvest)
@@ -93,7 +95,7 @@ mdn &lt;- mdn[[1]]</code></pre>
 <pre class="r"><code>mdn$Years &lt;- NULL
 country &lt;- mdn[1:54,1]
 mdn &lt;- mdn[1:54,2:17]</code></pre>
-<p>I then strip the suffixes from the numbers frame.</p>
+<p>I then strip the suffixes from the numbers frame with the function I loaded in earlier.</p>
 <pre class="r"><code>for (i in 1:16) {
   mdn[,i] &lt;- stripSuffix(mdn[,i])
 }</code></pre>
@@ -138,7 +140,10 @@ head(mdn)</code></pre>
 <hr />
 <hr />
 <hr />
-<p>qq</p>
+</div>
+<div id="mammals" class="section level2">
+<h2>Mammals</h2>
+</div>
 
 
 </div>

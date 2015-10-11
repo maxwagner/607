@@ -6,6 +6,8 @@ output: html_document
 ---
 ***
 
+## Motocross des Nations
+
 The first set of the 3 I am going to look at is some web scraped data from the wikipedia page on Motocross des Nations. The link to the original page can be found [here](https://en.wikipedia.org/wiki/Motocross_des_Nations). It doesn't use much/any tidyr/dplyr, but it does use webscraping with rvest, piping, and quite a bit of data tranformation via other methods. Most of the tidying is taken care of by rvest, and the way the table information is read in.
 
 The first piece is loading in the libraries I need, and a function that does some string replacing in numbers.
@@ -41,7 +43,7 @@ country <- mdn[1:54,1]
 mdn <- mdn[1:54,2:17]
 ```
 
-I then strip the suffixes from the numbers frame.
+I then strip the suffixes from the numbers frame with the function I loaded in earlier.
 ```{r}
 for (i in 1:16) {
   mdn[,i] <- stripSuffix(mdn[,i])
@@ -87,8 +89,28 @@ mdn <- arrange(mdn, avg)
 head(mdn)
 ```
 
-***
-***
-***
+## Mammals
 
-qq
+The second set of data I wanted to look at was the pantheria set on mammals. I want to look strictly at columns based on body mass, and exclude anything else but the name.
+
+I'll start by pulling in the text file and reading it as a table via dplyr.
+```{r}
+mammals <- read.table("https://raw.githubusercontent.com/maxwagner/607/master/project02/mammals.txt", sep = "\t", header = TRUE, stringsAsFactors = FALSE)
+mammals <- tbl_df(mammals)
+```
+
+Now some things to manipulate the column names. First, convert all the names to lowercase, then remove the weird strings on front of some of them.
+```{r}
+colnames(mammals) <- tolower(colnames(mammals))
+colnames(mammals) <- str_replace(colnames(mammals), "msw05_", "")
+colnames(mammals) <- str_replace(colnames(mammals), "x[0-9._]+", "")
+```
+
+The next step is choosing a few columns for the names of the mammals, and then any column that contains the string "bodymass." The next step is to remove the data pieces that were not available, which were labeled as -999. I then unite all the names into one column, as the separate ones are not needed for this set. I then get rid of the columns that have almost no usable data, and follow that with a check for complete cases with the three remaining body mass columns. This effectively turned 5400 rows into 400, all with usable and readable information.
+```{r}
+mammals <- select(mammals, order, family, binomial, contains("bodymass"))
+mammals[mammals == -999] <- NA
+mammals <- unite(mammals, full_name, order, family, binomial, sep = ", ")
+mammals <- mammals[,1:4]
+mammals <- mammals[complete.cases(mammals),]
+```
