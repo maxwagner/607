@@ -1,0 +1,17 @@
+---
+title: "Project 02"
+author: "Max Wagner"
+date: "October 8th, 2015"
+output: html_document
+---
+***
+
+## Advertising
+
+Loading in some libraries
+```{r message=FALSE}
+library(stringr)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+```
