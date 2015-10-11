@@ -8,10 +8,40 @@ output: html_document
 
 ## Advertising
 
-Loading in some libraries
+The third set of information I wanted to look at was the advertising information about Google, Facebook, Yahoo, Microsoft, and AOL. The revenue is presented by year and by company, but in a disorderly way. As suggested, I'm analyzing how much revenue was made each yer per company, and how much that revenue increased or decreased over time in comparison to the other companies listed. The data can be viewed [here](http://www.journalism.org/media-indicators/digital-u-s-display-advertising-by-company/).
+
+Loading in some libraries.
 ```{r message=FALSE}
-library(stringr)
 library(dplyr)
 library(tidyr)
 library(ggplot2)
 ```
+
+Reading in the advertising file, setting it as a dplyr table, adding the year column name, and removing the total column.
+```{r}
+ads <- read.csv("https://raw.githubusercontent.com/maxwagner/607/master/project02/ads.csv", header = TRUE)
+ads <- tbl_df(ads)
+colnames(ads)[1] <- "year"
+ads <- ads[,1:6]
+```
+
+Gathering the info into a more readable format. I decided to keep each year and company as a separate row, instead of making each year a different column. It works better for creating plots. I then rearranged the column names to a more fitting order.
+```{r}
+ads <- ads %>%
+  gather(company, revenue, Google:AOL)
+ads <- ads[c("company", "year", "revenue")]
+```
+
+On the following plot, each line represents a company, x represents time, and y is the revenue produced. The takeaway is that Google and Facebook signifcantly increased their advertising revenue while Yahoo, Microsoft, and AOL only changed marginally in comparison.
+```{r}
+ggplot(data = ads, aes(x = year, y = revenue, group = company, colour = company)) + geom_line(size = 1.25) + geom_point(size = 4) + ggtitle("Advertising Spent/Year by Company")
+```
+
+The next part transforms the data into a different form, where each row is only 1 company, and the columns include each years' revenue. The change column then represents the increase in revenue from 2009 to 2013. A change value of .43 would represent a 43% increase from 2009 to 2013. The point graph represents the same idea.
+```{r}
+ads <- ads %>%
+  spread(year, revenue)
+ads$change <- (ads$`2013` / ads$`2009`) - 1
+ggplot(data = ads, aes(x = company, y = change)) + ggtitle("Revenue Change Over Time") + geom_point(size = 5, color = "blue")
+```
+
