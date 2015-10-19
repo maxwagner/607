@@ -1,0 +1,30 @@
+{
+  "books": {
+    "book": [
+      {
+        "title": "the magicians",
+        "author": "lev grossman",
+        "isbn": "0452296293",
+        "genre": "science fiction",
+        "publisher": "plume",
+        "year": "2010"
+      },
+      {
+        "title": "shards and ashes",
+        "author": "melissa marr, kelley armstrong",
+        "isbn": "0062098454",
+        "genre": "fiction",
+        "publisher": "harpercollins",
+        "year": "2013"
+      },
+      {
+        "title": "after",
+        "author": "ellen datlow",
+        "isbn": "1423148126",
+        "genre": "fiction",
+        "publisher": "disney-hyperion",
+        "year": "2013"
+      }
+    ]
+  }
+}

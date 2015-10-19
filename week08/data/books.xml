@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<books>
+   <book>
+      <title>the magicians</title>
+      <author>lev grossman</author>
+      <isbn>0452296293</isbn>
+      <genre>science fiction</genre>
+      <publisher>plume</publisher>
+      <year>2010</year>
+   </book>
+   <book>
+      <title>shards and ashes</title>
+      <author>melissa marr, kelley armstrong</author>
+      <isbn>0062098454</isbn>
+      <genre>fiction</genre>
+      <publisher>harpercollins</publisher>
+      <year>2013</year>
+   </book>
+   <book>
+      <title>after</title>
+      <author>ellen datlow</author>
+      <isbn>1423148126</isbn>
+      <genre>fiction</genre>
+      <publisher>disney-hyperion</publisher>
+      <year>2013</year>
+   </book>
+</books>
