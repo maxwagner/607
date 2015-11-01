@@ -1,0 +1,19 @@
+---
+title: 'Assignment 10'
+author: "Max Wagner"
+date: "October 31, 2015"
+output:
+  html_document:
+    theme: flatly
+    highlight: espresso
+---
+
+***
+Query the science top stories API, and get the results section only into an data frame. Then do a little head view of just the title column.
+```{r message=FALSE}
+library(jsonlite)
+nyt_j <- fromJSON("http://api.nytimes.com/svc/topstories/v1/science.json?api-key=17068d0e51d2b2dbcbc67410171d1146:10:73350860")
+nyt_j <- data.frame(nyt_j$results)
+
+head(nyt_j$title)
+```
