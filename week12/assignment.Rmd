@@ -1,0 +1,48 @@
+---
+title: 'Assignment 12'
+author: "Max Wagner"
+date: "November 10, 2015"
+output:
+  html_document:
+    theme: flatly
+    highlight: espresso
+---
+
+***
+
+# Looking at the data
+
+The spambase email data is already past the corpus phase, and instead gives a dtm like structure, with a few additional columns with capital letter information and the spam/ham indicator. I'll make the last column a factor for later use in the model. The table at the end shows there are 2788 ham emails, and 1813 spam emails.
+```{r}
+library(caret)
+library(kernlab)
+spambase <- read.csv("spambase.data", header = FALSE)
+spambase$V58 <- as.factor(spambase$V58)
+head(spambase)
+table(spambase$V58)
+```
+
+# Spliting the data
+
+We need to split the data into two different sets. One section will be for training, and the other section for testing. We'll need to split the original set into spam and ham first. Then recombine it into a smaller set.
+```{r}
+ham <- subset(spambase, V58 == 0)
+spam <- subset(spambase, V58 == 1)
+training <- rbind(ham[1:600,], spam[1:400,])
+testing <- rbind(ham[601:1200,], spam[401:800,])
+```
+
+# A model or two
+
+The next step is to try to fit it to a model. I'll try out a couple different ones to see how they compare to each other. I used SVM and random forests to test out how well it fit. 
+```{r warning=FALSE}
+svm <- train(training$V58 ~ ., data = training, method = "svmRadial")
+pred <- predict(svm, testing)
+confu <- confusionMatrix(pred, testing$V58); confu
+
+rf <- train(training$V58 ~ ., data = training, method = "rf")
+pred <- predict(rf, testing)
+confu <- confusionMatrix(pred, testing$V58); confu
+```
+
+From the two models, we can see that SVM gave an accuracy of 89.3%, and random forests gave an accuracy of 93.4%. The big caveat with the entire project is that I am unsure of how "statisically sound" the entire process was. The exclusion of a traditional corpus and instead having a percentages document made the process confusing to me at first.
