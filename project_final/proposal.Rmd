@@ -1,0 +1,40 @@
+---
+title: 'Final Project Proposal'
+author: "Max Wagner"
+date: "November 18, 2015"
+output:
+  html_document:
+    theme: flatly
+    highlight: espresso
+---
+
+# The idea
+
+I am a huge movie buff. I see them in the theatre when I can, but the real savior to me in the last few years has been streaming sites like Netflix, Amazon, iTunes, Hulu, etc. My assumption going into the project is that theatre attendance has declined in the past years with the introduction of easy streaming services. However, what I am not sure of is how this has affected the industry as a whole. There are a number of factors involved:
+
+* did the likely dip in movie sales damage profits overall?
+* did interest in movies increase with the introduction of streaming?
+* did that interest make up for loss of traditional sales?
+* are theatres becoming unprofitable to run?
+* are different types genres in demand because of this?
+* are sites like netflix profitable to run?
+* is streaming benefial for small studios and movie makers?
+* who benefits the most from the new arrangement, the consumer, the makers, or the streaming sites?
+* how does pirating affect these numbers?
+
+The list of similar questions could go on infinitely. I believe that I would want to look at the pure numbers involved with theatre attendance and streaming amounts. This would give a good foundation to start with. I could then branch out into more obscure things, like differentiating between "blockbusters" and indie films. 
+
+# Data Sources
+
+One of the main issues with the project will likely be finding structured data for everything I want to look at. One solid source is NATO, the National Association of Theatre Owners. Their site has a data section with information on gross profits, ticket prices, total theatres, top theatre chains, top movies, and a few other things. That data can be found [here](http://natoonline.org/data/).
+
+A few other sources:
+
+* [Sandvine Research](https://www.sandvine.com/downloads/general/global-internet-phenomena/2013/2h-2013-global-internet-phenomena-report.pdf)
+* [Nielson](http://www.nielsen.com/content/corporate/us/en/insights/reports/2014/more-of-what-we-want.html)
+
+# Concluding Remarks
+
+The scope of the project is way too large. When collecting the data I will decide which aspect to hone in on. The data on some aspects of the industry is unfortunately unavailable.
+
+As far as team members go, I am still open to collaborating with someone, but I am not currently.
