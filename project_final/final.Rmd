@@ -33,7 +33,7 @@ trim <- function(x)
 
 Taking a table from NATO Online, we can see the total admissions by year in the US and Canada combined. The `Admissions` column is in billions. There is a clear trend of increasing attendance from 1987 to the early 2000's, and a definite decline from then until present day. White Hutchinson Leisure and Learning Group reported a 27% drop in revenue since 2002 to acompany the decline in admissions. There are number of possible reasons for the trend of rise and decline. We'll take a look at a few of the possible factors in the next section.
 ```{r echo=FALSE,message=FALSE}
-file <- "data/admissions.txt"
+file <- "https://raw.githubusercontent.com/maxwagner/607/master/project_final/data/admissions.txt"
 admissions <- read.csv(file, sep = "\t", header = TRUE, stringsAsFactors = FALSE)
 colnames(admissions) <- c("Year", "Admissions")
 admissions <- as.data.frame(apply(admissions, 2, function(x)gsub('~', '',x)))
@@ -56,7 +56,7 @@ ggplot(data = admissions, aes(x = Year, y = Admissions)) + geom_point() + geom_s
 
 A table from NATO Online has information on the yearly average US movie ticket price. Ticket prices, as expected, increased linearly for each year. The `Price` column is in USD. The plot below for prices do not indicate any sort of trend that would indicate a reason for the early 2000's peak in attendance. A potential reason for decline directly following could be that customers did not feel movies were worth the increased price. 
 ```{r echo=FALSE,message=FALSE}
-file <- "data/ticket_prices.txt"
+file <- "https://raw.githubusercontent.com/maxwagner/607/master/project_final/data/ticket_prices.txt"
 ticket_prices <- read.csv(file, sep = "\t", header = TRUE, stringsAsFactors = FALSE)
 colnames(ticket_prices) <- c("Year", "Price")
 ticket_prices <- as.data.frame(apply(ticket_prices, 2, function(x)gsub('~', '',x)))
@@ -82,7 +82,7 @@ ggplot(data = ticket_prices, aes(x = Year, y = Price)) + geom_point(binwidth = 5
 
 The following table from Cisco shows a relative estimate of internet bandwidth used. The first row is per day, the second is per hour, and the rest are per second. The bandwidth used from 1992 to 1997 is relatively small. The amount begins to be substantial in 2002, and only increases from there. The estimated usage in 2019 is a staggering 51,694% increase over the usage in 2002.
 ```{r echo=FALSE,message=FALSE}
-file <- "data/traffic.csv"
+file <- "https://raw.githubusercontent.com/maxwagner/607/master/project_final/data/traffic.csv"
 traffic <- read.csv(file, header = TRUE, stringsAsFactors = FALSE)
 colnames(traffic) <- c("Year", "Bandwidth")
 kable(traffic)
@@ -96,7 +96,7 @@ The following is a table from Sandvine, outlining the overall bandwidth distribu
 
 Taking a closer look at Netflix in particular, and grabbing their subscriber data directly from their revenue excel documents, we can see that their userbase has substantially increased each year following 2002.
 ```{r echo=FALSE,warning=FALSE,message=FALSE}
-file <- "data/netflix.csv"
+file <- "https://raw.githubusercontent.com/maxwagner/607/master/project_final/data/netflix.csv"
 netflix <- read.csv(file, header = FALSE, stringsAsFactors = FALSE)
 netflix_years <- t(netflix[1,])
 netflix_subs <- t(netflix[2,])
