@@ -1,0 +1,146 @@
+---
+title: "Final Project Proposal"
+author: "Max Wagner"
+date: "November 18, 2015"
+output:
+  pdf_document: default
+  html_document:
+    highlight: espresso
+    theme: flatly
+---
+
+# Introduction
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# libs
+require(rvest)
+require(knitr)
+require(ggplot2)
+require(tidyr)
+require(dplyr)
+require(quantmod)
+require(randomForest)
+```
+
+```{r echo=FALSE}
+# functions
+trim <- function(x) 
+  gsub("^\\s+|\\s+$", "", x)
+```
+
+
+# Movie Admissions
+
+Taking a table from NATO Online, we can see the total admissions by year in the US and Canada combined. The `Admissions` column is in billions. There is a clear trend of increasing attendance from 1987 to the early 2000's, and a definite decline from then until present day. White Hutchinson Leisure and Learning Group reported a 27% drop in revenue since 2002 to acompany the decline in admissions. There are number of possible reasons for the trend of rise and decline. We'll take a look at a few of the possible factors in the next section.
+```{r echo=FALSE,message=FALSE}
+file <- "data/admissions.txt"
+admissions <- read.csv(file, sep = "\t", header = TRUE, stringsAsFactors = FALSE)
+colnames(admissions) <- c("Year", "Admissions")
+admissions <- as.data.frame(apply(admissions, 2, function(x)gsub('~', '',x)))
+admissions <- as.data.frame(apply(admissions, 2, function(x)gsub('\\s+', '',x)))
+admissions$Year <- as.numeric(as.character((admissions$Year)))
+admissions$Admissions <- as.numeric(as.character((admissions$Admissions)))
+admissions <- arrange(admissions, Year)
+
+admissions_print_1 <- admissions[1:14,]
+admissions_print_2 <- admissions[15:28,]
+rownames(admissions_print_2) <- NULL
+admissions_print_1 <- cbind(admissions_print_1, admissions_print_2)
+
+kable(admissions_print_1)
+ggplot(data = admissions, aes(x = Year, y = Admissions)) + geom_point() + geom_smooth() + ggtitle("Admissions by Year")
+```
+
+
+# Ticket Prices
+
+A table from NATO Online has information on the yearly average US movie ticket price. Ticket prices, as expected, increased linearly for each year. The `Price` column is in USD. The plot below for prices do not indicate any sort of trend that would indicate a reason for the early 2000's peak in attendance. A potential reason for decline directly following could be that customers did not feel movies were worth the increased price. 
+```{r echo=FALSE,message=FALSE}
+file <- "data/ticket_prices.txt"
+ticket_prices <- read.csv(file, sep = "\t", header = TRUE, stringsAsFactors = FALSE)
+colnames(ticket_prices) <- c("Year", "Price")
+ticket_prices <- as.data.frame(apply(ticket_prices, 2, function(x)gsub('~', '',x)))
+ticket_prices <- as.data.frame(apply(ticket_prices, 2, function(x)gsub('\\s+', '',x)))
+ticket_prices <- as.data.frame(apply(ticket_prices, 2, function(x)gsub('\\$', '',x)))
+ticket_prices <- as.data.frame(apply(ticket_prices, 2, function(x)gsub('\\*', '',x)))
+ticket_prices$Year <- as.numeric(as.character((ticket_prices$Year)))
+ticket_prices$Price <- as.numeric(as.character((ticket_prices$Price)))
+ticket_prices <- arrange(ticket_prices, Year)
+
+ticket_prices <- ticket_prices[20:47,]
+ticket_prices_1 <- ticket_prices[1:14,]
+ticket_prices_2 <- ticket_prices[15:28,]
+rownames(ticket_prices_2) <- NULL
+ticket_prices_1 <- cbind(ticket_prices_1, ticket_prices_2)
+
+kable(ticket_prices_1)
+ggplot(data = ticket_prices, aes(x = Year, y = Price)) + geom_point(binwidth = 5) + geom_smooth() + ggtitle("Price by Year")
+```
+
+
+# Internet Traffic
+
+The following table from Cisco shows a relative estimate of internet bandwidth used. The first row is per day, the second is per hour, and the rest are per second. The bandwidth used from 1992 to 1997 is relatively small. The amount begins to be substantial in 2002, and only increases from there. The estimated usage in 2019 is a staggering 51,694% increase over the usage in 2002.
+```{r echo=FALSE,message=FALSE}
+file <- "data/traffic.csv"
+traffic <- read.csv(file, header = TRUE, stringsAsFactors = FALSE)
+colnames(traffic) <- c("Year", "Bandwidth")
+kable(traffic)
+```
+
+The following is a table from Sandvine, outlining the overall bandwidth distribution from 2013. Netflix, Youtube, Amazon Video, and Hulu are all inside the top 10 for total bandwidth, with Netflix accounting for almost 32% of all data transferred. What this means is that people are watching a substantial amount of video every day, and aren't going to the theatre to do it. BitTorrent and HTTP are important to the overall view as well. Not all file sharing and BitTorrent traffic are media files, but the majority are, and together they account for 14% of all traffic. 
+
+![SandVine](http://puu.sh/lTCNt/653340ce0c.png)
+
+# Netflix
+
+Taking a closer look at Netflix in particular, and grabbing their subscriber data directly from their revenue excel documents, we can see that their userbase has substantially increased each year following 2002.
+```{r echo=FALSE,warning=FALSE,message=FALSE}
+file <- "data/netflix.csv"
+netflix <- read.csv(file, header = FALSE, stringsAsFactors = FALSE)
+netflix_years <- t(netflix[1,])
+netflix_subs <- t(netflix[2,])
+subs_diff <- Delt(netflix_subs) * 100
+netflix <- data.frame(cbind(netflix_years, netflix_subs, subs_diff))
+colnames(netflix) <- c("Year", "Subscribers", "% Change")
+rownames(netflix) <- NULL
+
+kable(netflix)
+ggplot(netflix, aes(x = Year, y = Subscribers)) + geom_point() + geom_smooth() + scale_x_continuous(breaks = netflix_years) + labs(x = "Years") + ggtitle("Subscribers by Year")
+ggplot(netflix, aes(x = Year, y = `% Change`)) + geom_point() + geom_smooth() + scale_x_continuous(breaks = netflix_years) + labs(x = "Years") + ggtitle("Change by Year in Percentage")
+```
+
+# Netflix and Theatres
+
+Below is a plot, correlation, and summary stats on admissions numbers for theatres and netflix usage. The inital look is that as subscribers to netflix increase, the admissions to theatres go down.
+
+```{r,echo=FALSE,message=FALSE}
+netflix_tickets <- left_join(netflix, admissions, by = "Year")
+ggplot(netflix_tickets, aes(Subscribers, Admissions)) + geom_point() + labs("Subscribers", "Admissions") + geom_smooth()
+cor.test(netflix_tickets$Subscribers, netflix_tickets$Admissions)
+```
+
+The correlation value above of `r cor(netflix_tickets$Subscribers, netflix_tickets$Admissions)` indicates that that the correlation is significant, while can also be gained from the p-value being below 0.05. 
+
+```{r,echo=FALSE,message=FALSE}
+m_nt <- lm(netflix_tickets$Subscribers ~ netflix_tickets$Admissions)
+summary(m_nt)
+```
+
+The important note here is that the p value is much lower than the acceptable 0.05, and that the R-squared value is relatively high.
+
+
+
+
+
+
+
+
+# Sources
+
+* http://rpubs.com/catlin/rvest
+* http://natoonline.org/data
+* https://www.whitehutchinson.com/blog/2015/01/movie-attendance-continues-its-12-year-decline/
+* http://www.cisco.com/c/en/us/solutions/collateral/service-provider/visual-networking-index-vni/VNI_Hyperconnectivity_WP.html
+* https://www.sandvine.com/downloads/general/global-internet-phenomena/2013/2h-2013-global-internet-phenomena-report.pdf
+* http://ir.netflix.com/results.cfm
