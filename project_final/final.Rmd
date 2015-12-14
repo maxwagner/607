@@ -1,7 +1,7 @@
 ---
-title: "Final Project Proposal"
+title: "Declining Movie Attendance"
 author: "Max Wagner"
-date: "November 18, 2015"
+date: "December 4, 2015"
 output:
   pdf_document: default
   html_document:
@@ -11,6 +11,8 @@ output:
 
 # Introduction
 
+The original goal of the project was to see just how much streaming and pirating hurt theatre attendance over the past decade. The reality of the problem obviously has many more facets than I was able to successfully test and quantify. To make the scope narrower and potentially more telling on a specific subject, I decided to stick closer to the impact ticket prices, and netflix had in particular. The theatre industry has been on a decline since 2002, where it had record sales. A roughly 27% decrease in revenue, and 250 million less ticket sales per year dictates that there are a number of factors creating the problem. My estimation is that online streaming is the largest contribution to the problem of ticket sales.
+
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 # libs
 require(rvest)
@@ -19,7 +21,6 @@ require(ggplot2)
 require(tidyr)
 require(dplyr)
 require(quantmod)
-require(randomForest)
 ```
 
 ```{r echo=FALSE}
@@ -77,6 +78,40 @@ kable(ticket_prices_1)
 ggplot(data = ticket_prices, aes(x = Year, y = Price)) + geom_point(binwidth = 5) + geom_smooth() + ggtitle("Price by Year")
 ```
 
+# Box Office Gross Profit
+
+The following data on US and Canadian gross profit is from NATO Online. The inclusion of gross profit and exclusion of net profit is purely due to a lack of data for accurate net profit. The importance of the sudden rise and tapering in more recent years is very telling of the net profit, without knowing the actual net figure. The running costs of theatres has increased with the presence of newer projectors and expenses. This means the running cost has continued to rise, while the gross has began to taper.
+```{r echo=FALSE,message=FALSE}
+url <- "http://natoonline.org/data/boxoffice/"
+gross <- url %>%
+  read_html() %>%
+  html_nodes(".column-2 , .column-1") %>%
+  html_text()
+
+gross <- gross[-c(1:2)]
+years <- gross[c(seq(1, length(gross), by = 2))]
+profit <- gross[c(seq(2, length(gross), by = 2))]
+gross <- as.data.frame(cbind(years, profit))
+colnames(gross) <- c("Year", "Gross")
+
+gross <- as.data.frame(apply(gross, 2, function(x)gsub('~', '',x)))
+gross <- as.data.frame(apply(gross, 2, function(x)gsub('\\s+', '',x)))
+gross <- as.data.frame(apply(gross, 2, function(x)gsub('\\$', '',x)))
+gross <- as.data.frame(apply(gross, 2, function(x)gsub('\\Â', '',x)))
+
+gross$Year <- as.numeric(as.character((gross$Year)))
+gross$Gross <- as.numeric(as.character((gross$Gross)))
+gross <- arrange(gross, Year)
+
+gross_1 <- gross[1:14,]
+gross_2 <- gross[15:28,]
+rownames(gross_2) <- NULL
+gross_1 <- cbind(gross_1, gross_2)
+
+kable(gross_1)
+ggplot(data = gross, aes(x = Year, y = Gross)) + geom_point(binwidth = 5) + geom_smooth() + ggtitle("Gross Profit by Year")
+```
+
 
 # Internet Traffic
 
@@ -110,13 +145,13 @@ ggplot(netflix, aes(x = Year, y = Subscribers)) + geom_point() + geom_smooth() +
 ggplot(netflix, aes(x = Year, y = `% Change`)) + geom_point() + geom_smooth() + scale_x_continuous(breaks = netflix_years) + labs(x = "Years") + ggtitle("Change by Year in Percentage")
 ```
 
-# Netflix and Theatres
+# Netflix and Theatre Attendance
 
 Below is a plot, correlation, and summary stats on admissions numbers for theatres and netflix usage. The inital look is that as subscribers to netflix increase, the admissions to theatres go down.
 
 ```{r,echo=FALSE,message=FALSE}
 netflix_tickets <- left_join(netflix, admissions, by = "Year")
-ggplot(netflix_tickets, aes(Subscribers, Admissions)) + geom_point() + labs("Subscribers", "Admissions") + geom_smooth()
+ggplot(netflix_tickets, aes(Subscribers, Admissions)) + geom_point() + labs("Subscribers", "Admissions") + geom_smooth() + ggtitle("Netflix Subscribers vs Theatre Admissions")
 cor.test(netflix_tickets$Subscribers, netflix_tickets$Admissions)
 ```
 
@@ -129,12 +164,38 @@ summary(m_nt)
 
 The important note here is that the p value is much lower than the acceptable 0.05, and that the R-squared value is relatively high.
 
+# Netflix, Theatre Price & Attendance
 
+```{r,echo=FALSE,message=FALSE}
+net_tick_price <- left_join(netflix_tickets, ticket_prices)
+```
 
+The question is whether the price of tickets has any indication on whether theatre attendance will be up that year, in addition, whether netflix usage has influence on both variables. The first look is at theatre attendance vs the price for a single movie. There is a slight trend for lower ticket prices to correlate with higher admission numbers. The actual correlation coefficient for Admissions and Price is `r cor(net_tick_price$Admissions, net_tick_price$Price)`, which indicates a very strong negative relationship between the two, where admissions were significantly higher when ticket prices were lower. Adjusting for inflation may prove this relationship slightly less significant.
 
+```{r,echo=FALSE,message=FALSE}
+ggplot(net_tick_price, aes(Admissions, Price)) + geom_point() + labs("Admissions", "Price") + geom_smooth() + ggtitle("Theatre Admission vs Ticket Price")
+```
 
+In the plot below, the count of Netflix subscribers vs price of the average ticket price is shown. This plot is saying that as subscribers for Netflix increase, the average price of tickets increases. This is mostly due to the price rising over time, and Netflix gaining popularity at the same time. It could be interpretted as the theatres needing to charge more in order to make up for lost quantity of tickets sold, or could be coincidence.
 
+```{r,echo=FALSE,message=FALSE}
+ggplot(net_tick_price, aes(Subscribers, Price)) + geom_point() + labs("Subscribers", "Price") + geom_smooth() + ggtitle("Netflix Subscribers vs Ticket Price")
+```
 
+Below we can look at a model including price, attendance, and Netflix subscribers. According to the model, the price of a ticket is a much better indicator than the amount of netflix subscribers when trying to predict the total admissions to movies. How accurate the model is remains debateable. 
+
+```{r,echo=FALSE,message=FALSE}
+m_nta <- lm(net_tick_price$Admissions ~ net_tick_price$Subscribers + net_tick_price$Price)
+summary(m_nta)
+```
+
+# Conclusion
+
+The dilemma with looking into a complex problem like declining theatre attendance is finding the correct niche to explore first. I believe that the base of the problem lies with the convenience factor of watching a movie from home, versus driving to a theatre, spending money on tickets and food, and sitting in a room with fifty other people. The indication that ticket price is a larger factor than a streaming service such as Netflix can also be extrapolated to include the high food prices found in theatres. People simply do not wish to pay extra for something that they do not find worth it.
+
+If I were to continue with research, the next subject to look into is the attractiveness of going to a theatre for difference generations, versus who movies often target. From a shallow search, it seems that movies often target the teenage to early twenties crowd, yet the idea of going to a theatre is not appealing to the same group. Adults who enjoy going to the theatre, often cannot find a movie that targets them. It's an interesting aspect of the overall problem and worth visiting.
+
+My end consensus is that while ticket prices and streaming services do seem to be factors in declining sales, there are a myriad of other issues not represented in this project.
 
 # Sources
 
