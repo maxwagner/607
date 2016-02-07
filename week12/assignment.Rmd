@@ -1,11 +1,12 @@
 ---
-title: 'Assignment 12'
+title: "Assignment 12"
 author: "Max Wagner"
 date: "November 10, 2015"
 output:
+  pdf_document: default
   html_document:
-    theme: flatly
     highlight: espresso
+    theme: flatly
 ---
 
 ***
